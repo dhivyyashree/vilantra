@@ -21,7 +21,7 @@ export default function AnimatedVilantraLogo() {
           .text {
             font-family: 'Playfair Display', serif;
             font-size: 46px;
-            fill: #333333;
+            fill: #8B1E3F;
             font-weight: 600;
             opacity: 0;
             animation: fadeIn 1.5s forwards;

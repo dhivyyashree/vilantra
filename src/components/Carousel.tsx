@@ -1,55 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import image1 from "@/components/img1.png"
-import image2 from "@/components/img2.png"
-import image3 from "@/components/img3.png"
-import image4 from "@/components/img4.png"
-const images = [
-    image1,image2,image3,image4
-//   "/sarees.png",
-//   "/designer-blouses.png",
-//   "/custom-outfits.png",
-//   "/budget-sarees.png",
+import Link from "next/link";
+import image1 from "@/components/fashion5.jpg";
+import image2 from "@/components/fashion2.jpg";
+import image3 from "@/components/fashion3.jpg";
+import image4 from "@/components/fashion4.jpg";
+
+const images = [image1, image2, image3, image4];
+const links = [
+  "/shop",
+  "/custom-outfits",
+  "/designer-sarees",
+  "/budget-friendly-sarees",
 ];
 
 export default function Carousel() {
   const [current, setCurrent] = useState(0);
 
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % images.length);
-  };
+  // ✅ Autoplay every 4s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + images.length) % images.length);
+  const goToSlide = (index: number) => {
+    setCurrent(index);
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-lg shadow-lg">
-      <Image
-        src={images[current]}
-        alt={`Slide ${current + 1}`}
-        width={1440}
-        height={600}
-        className="object-cover w-full h-96"
-      />
+    <div className="relative w-screen h-[600px] overflow-hidden">
+      <Link href={links[current]} aria-label={`Go to ${links[current]}`}>
+        <Image
+          src={images[current]}
+          alt={`Slide ${current + 1}`}
+          fill
+          className="object-cover cursor-pointer"
+          priority
+        />
+      </Link>
 
-      <button
-        onClick={prevSlide}
-        className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 hover:bg-white p-2 rounded-full shadow"
-        aria-label="Previous"
-      >
-        ‹
-      </button>
-
-      <button
-        onClick={nextSlide}
-        className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 hover:bg-white p-2 rounded-full shadow"
-        aria-label="Next"
-      >
-        ›
-      </button>
+      {/* Dots on the bottom-left */}
+      <div className="absolute bottom-5 left-5 flex space-x-3">
+        {images.map((_, idx) => (
+          <button
+            key={idx}
+            className={`h-3 w-3 rounded-full transition-all ${
+              idx === current ? "bg-brandpink scale-125" : "bg-white/50"
+            }`}
+            onClick={() => goToSlide(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body >
         <Header />
-        <main className="pt-100">
+        <main className="">
           {children}
         </main>
       </body>
