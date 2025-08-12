@@ -19,7 +19,6 @@ const links = [
 export default function Carousel() {
   const [current, setCurrent] = useState(0);
 
-  // ✅ Autoplay every 4s
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % images.length);
@@ -32,7 +31,7 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-screen h-[600px] overflow-hidden">
+    <div className="relative w-screen h-[300px] md:h-[600px] overflow-hidden">
       <Link href={links[current]} aria-label={`Go to ${links[current]}`}>
         <Image
           src={images[current]}
@@ -40,15 +39,16 @@ export default function Carousel() {
           fill
           className="object-cover cursor-pointer"
           priority
+          sizes="(max-width: 768px) 100vw, 100vw"
         />
       </Link>
 
-      {/* Dots on the bottom-left */}
-      <div className="absolute bottom-5 left-5 flex space-x-3">
+      {/* Dots: mobile bottom-center, desktop bottom-left */}
+      <div className="absolute bottom-4 left-1/2 md:left-5 transform -translate-x-1/2 md:translate-x-0 flex space-x-2 md:space-x-3">
         {images.map((_, idx) => (
           <button
             key={idx}
-            className={`h-3 w-3 rounded-full transition-all ${
+            className={`h-2.5 w-2.5 md:h-3 md:w-3 rounded-full transition-all duration-300 ${
               idx === current ? "bg-brandpink scale-125" : "bg-white/50"
             }`}
             onClick={() => goToSlide(idx)}

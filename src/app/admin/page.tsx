@@ -1,51 +1,169 @@
 "use client";
 
 import { useState } from "react";
+import { uploadProduct } from "@/lib/api";
+
+interface Variant {
+  color: string;
+  images: File[];
+  focusValues: string[];
+}
 
 export default function ProductUploadForm() {
-  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [discountPrice, setDiscountPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [variants, setVariants] = useState<Variant[]>([
+    { color: "", images: [], focusValues: [] },
+  ]);
+
+  const handleFileChange = (index: number, files: FileList | null) => {
+    if (!files) return;
+    const updated = [...variants];
+    updated[index].images = Array.from(files);
+    updated[index].focusValues = Array.from(files).map(() => "center"); // default focus
+    setVariants(updated);
+  };
+
+  const handleFocusChange = (variantIndex: number, imageIndex: number, value: string) => {
+    const updated = [...variants];
+    updated[variantIndex].focusValues[imageIndex] = value;
+    setVariants(updated);
+  };
+
+  const addVariant = () => {
+    setVariants([...variants, { color: "", images: [], focusValues: [] }]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
 
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("original_price", originalPrice);
+    formData.append("discount_price", discountPrice);
+    formData.append("category", category);
+    formData.append("description", description);
+
+    const variantMeta = variants.map((v) => ({
+      color: v.color,
+      images: v.focusValues.map((focus) => ({ focus })),
+    }));
+    formData.append("variants", JSON.stringify(variantMeta));
+
+    variants.forEach((variant, vIndex) => {
+      const color = variant.color.trim().toLowerCase();
+      variant.images.forEach((file, fIndex) => {
+        const focus = variant.focusValues[fIndex];
+        const renamed = new File(
+          [file],
+          `${color}_${focus}_${fIndex}.jpg`,
+          { type: file.type }
+        );
+        formData.append("images", renamed);
+      });
+    });
 
     try {
-      const res = await fetch("/api/products/upload", {
-        method: "POST",
-        body: data,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-      alert("Product uploaded successfully!");
-      form.reset();
+      const result = await uploadProduct(formData);
+      alert("✅ Product uploaded: " + result.id);
+      window.location.reload();
     } catch (error) {
+      alert("❌ Upload failed");
       console.error(error);
-      alert("Failed to upload product");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-4 p-4 pt-50">
-      <input name="title" placeholder="Title" required className="border p-2 w-full" />
-      <input name="price" type="number" placeholder="Price" required className="border p-2 w-full" />
-      <input name="category" placeholder="Category" required className="border p-2 w-full" />
-      <textarea name="description" placeholder="Description" required className="border p-2 w-full" />
-      <input name="image" type="file" accept="image/*" required className="border p-2 w-full" />
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-xl mx-auto p-4 bg-white shadow rounded mt-30"
+    >
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Title"
+        required
+        className="w-full p-2 border rounded"
+      />
+      <input
+        value={originalPrice}
+        onChange={(e) => setOriginalPrice(e.target.value)}
+        placeholder="Original Price"
+        required
+        className="w-full p-2 border rounded"
+      />
+      <input
+        value={discountPrice}
+        onChange={(e) => setDiscountPrice(e.target.value)}
+        placeholder="Discount Price"
+        required
+        className="w-full p-2 border rounded"
+      />
+      <input
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        placeholder="Category"
+        className="w-full p-2 border rounded"
+      />
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Description"
+        className="w-full p-2 border rounded"
+      />
+
+      <h3 className="font-semibold">Color Variants</h3>
+      {variants.map((variant, i) => (
+        <div key={i} className="space-y-2 border p-3 rounded">
+          <input
+            placeholder="Color"
+            value={variant.color}
+            onChange={(e) => {
+              const updated = [...variants];
+              updated[i].color = e.target.value;
+              setVariants(updated);
+            }}
+            className="w-full p-2 border rounded"
+          />
+          <input
+            type="file"
+            multiple
+            onChange={(e) => handleFileChange(i, e.target.files)}
+            className="w-full"
+          />
+
+          {/* Focus Selector */}
+          {variant.images.map((file, imgIndex) => (
+            <div key={imgIndex} className="flex items-center gap-4 mt-2">
+              <p className="truncate w-40 text-sm">{file.name}</p>
+              <select
+                value={variant.focusValues[imgIndex]}
+                onChange={(e) => handleFocusChange(i, imgIndex, e.target.value)}
+                className="border rounded px-2 py-1"
+              >
+                <option value="top">Top</option>
+                <option value="center">Center</option>
+                <option value="bottom">Bottom</option>
+              </select>
+            </div>
+          ))}
+        </div>
+      ))}
+
       <button
-        type="submit"
-        disabled={loading}
-        className={`p-2 rounded text-white transition bg-pink-600
-            ${loading ? "bg-pink-600 cursor-not-allowed" : "bg-brandpink hover:bg-pink-600"}
-        `}
-        >
-        {loading ? "Uploading..." : "Upload Product"}
-     </button>
+        type="button"
+        onClick={addVariant}
+        className="text-blue-600 underline"
+      >
+        + Add Another Color
+      </button>
+
+      <button type="submit" className="w-full bg-black text-white py-2 rounded">
+        Upload Product
+      </button>
     </form>
   );
 }
-

@@ -3,16 +3,18 @@
 
 // export async function GET() {
 //   try {
-//     console.log("🌐 Attempting to connect to MongoDB...");
 //     const client = await clientPromise;
-//     console.log("✅ Connected to MongoDB!");
 //     const db = client.db("vilantra");
-//     console.log("📦 Using DB: vilantra");
-//     const products = await db.collection("products").find({}).toArray();
-//     console.log("🎨 Products fetched:", products);
+
+//     const products = await db
+//       .collection("products")
+//       .find({ category: "Designer sarees" })
+//       .limit(10) // Fetch max 100; you can control batch via frontend
+//       .toArray();
+
 //     return NextResponse.json(products);
 //   } catch (error) {
-//     console.error(error);
+//     console.error("Error fetching designer sarees:", error);
 //     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
 //   }
 // }
