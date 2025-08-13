@@ -21,21 +21,26 @@ interface Product {
 
 export default function DesignerSareesCarousel() {
   const [products, setProducts] = useState<Product[]>([]);
+  console.log("products",products)
   const carouselRef = useRef<HTMLDivElement>(null);
   console.log("hell",products)
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products/designer-sarees`);
-        const data = await res.json();
-        setProducts(data);
-      } catch (error) {
-        console.error("Error fetching designer sarees:", error);
-      }
-    };
-    fetchData();
-  }, []);
+  console.log("useEffect fired"); // should appear
+  const fetchData = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products/designer-sarees`);
+      console.log("res ok?", res.ok);
+      const data = await res.json();
+      console.log("fetched data:", data);
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching designer sarees:", error);
+    }
+  };
+  fetchData();
+}, []);
 
+  console.log("fuufufuf")
   const scroll = (direction: "left" | "right") => {
     if (!carouselRef.current) return;
     const container = carouselRef.current;
