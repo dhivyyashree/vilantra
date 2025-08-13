@@ -5,8 +5,26 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+type Image = {
+  url: string;
+  focus?: string; // optional, because sometimes focus may be undefined
+};
+
+type Variant = {
+  images: Image[];
+  // Add other variant fields if you use any
+};
+
+type Product = {
+  _id: string;
+  title: string;
+  discount_price: number;
+  original_price: number;
+  variants?: Variant[];
+};
+
 export default function DesignerSareesPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +65,7 @@ export default function DesignerSareesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {products.map((product) => {
-            const allImages = product.variants?.flatMap((v: any) => v.images || []) || [];
+            const allImages = product.variants?.flatMap((v: Variant) => v.images || []) || [];
             const [mainImage, alternateImage] = allImages;
 
             return (
@@ -60,7 +78,7 @@ export default function DesignerSareesPage() {
                         alt={product.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className={`object-cover duration-300 group-hover:opacity-0 ${getFocusClass(mainImage.focus)}`}
+                        className={`object-cover duration-300 group-hover:opacity-0 ${getFocusClass(mainImage.focus ??"center")}`}
                       />
                     )}
                     {alternateImage?.url && (
@@ -69,7 +87,7 @@ export default function DesignerSareesPage() {
                         alt={`${product.title} alternate`}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className={`absolute top-0 left-0 object-cover opacity-0 duration-300 group-hover:opacity-100 ${getFocusClass(alternateImage.focus)}`}
+                        className={`absolute top-0 left-0 object-cover opacity-0 duration-300 group-hover:opacity-100 ${getFocusClass(alternateImage.focus ?? "center")}`}
                       />
                     )}
                   </div>

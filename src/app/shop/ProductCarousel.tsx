@@ -3,12 +3,30 @@
 import Link from "next/link";
 import Image from "next/image";
 
-interface ProductCardProps {
-  product: any;
+interface ImageType {
+  url: string;
+  focus?: string;
 }
 
+interface Variant {
+  images: ImageType[];
+}
+
+interface Product {
+  _id: string;
+  title: string;
+  discount_price: number;
+  original_price: number;
+  variants?: Variant[];
+}
+
+interface ProductCardProps {
+  product: Product;
+}
+
+
 export default function ProductCard({ product }: ProductCardProps) {
-  const allImages = product.variants?.flatMap((v: any) => v.images || []) || [];
+  const allImages = product.variants?.flatMap((v) => v.images || []) || [];
 
   const getFocusClass = (focus: string) => {
     switch (focus) {
@@ -33,7 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               alt={product.title}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className={`object-cover duration-300 group-hover:opacity-0 ${getFocusClass(mainImage.focus)}`}
+              className={`object-cover duration-300 group-hover:opacity-0 ${getFocusClass(mainImage.focus ?? "center")}`}
             />
           )}
           {alternateImage?.url && (
@@ -42,7 +60,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               alt={`${product.title} alternate`}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className={`absolute top-0 left-0 object-cover opacity-0 duration-300 group-hover:opacity-100 ${getFocusClass(alternateImage.focus)}`}
+              className={`absolute top-0 left-0 object-cover opacity-0 duration-300 group-hover:opacity-100 ${getFocusClass(alternateImage.focus ?? "center")}`}
             />
           )}
         </div>

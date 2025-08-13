@@ -53,10 +53,12 @@ export default function ProductUploadForm() {
     }));
     formData.append("variants", JSON.stringify(variantMeta));
 
-    variants.forEach((variant, vIndex) => {
+    variants.forEach((variant) => {
+      
       const color = variant.color.trim().toLowerCase();
       variant.images.forEach((file, fIndex) => {
         const focus = variant.focusValues[fIndex];
+        
         const renamed = new File(
           [file],
           `${color}_${focus}_${fIndex}.jpg`,
